@@ -1,0 +1,37 @@
+version: '3.9'
+name: wireguardui
+
+services:
+  wireguardui:
+    build:
+      context: .
+    container_name: WireguardUI
+    environment:
+      - ORIGIN=${WEBURL}
+      - DATABASE_URL=${DATABASE_URL}
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - "${WEBPORT}:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - '${CONFIGDIR}:/config'
+    restart: unless-stopped
+  wireguard:
+    image: linuxserver/wireguard
+    container_name: Wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - SERVERURL=${WIREGUARDURL}
+      - SERVERPORT=${WIREGUARDPORT}
+      #- PEERS=trevor,ian,max
+    volumes:
+      - '${CONFIGDIR}:/config'
+    restart: unless-stopped
